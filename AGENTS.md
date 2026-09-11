@@ -1,10 +1,11 @@
-# reader
+# Reader
 
 A small Go web app for reading a URL (article or PDF) side by side with a chat
-pane, where the chat is answered by a **live Claude Code session running on
-this machine**, not by an API call. The server is a mailbox: the browser posts
-questions, the server pushes them to the attached Claude session over a
-WebSocket, and the session posts replies back. No API key, no API credits.
+pane, where the chat is answered by a **live coding-agent session running on
+this machine** (Claude Code, Codex, or similar), not by an API call. The server
+is a mailbox: the browser posts questions, the server pushes them to the
+attached agent session over a WebSocket, and the session posts replies back.
+No API key, no API credits.
 
 ## Run
 
@@ -19,20 +20,24 @@ frontend; `static/` is embedded into the binary. Requires `pdftotext`
 
 Open `http://<host>:<port>` in a browser, paste a URL, chat.
 
-## Attaching a Claude Code session (how the chat gets answered)
+## Attaching a session (how the chat gets answered)
 
-**If you are a Claude Code session working in this directory and the server is
-up (`curl -s localhost:<port>/api/status`), attach right away using the Monitor
-call below, and answer questions as they arrive.**
+**If you are an agent session (Claude Code, Codex, or similar) working in this
+directory and the server is up (`curl -s localhost:<port>/api/status`), attach
+right away as described below, and answer questions as they arrive.**
 
 The server pushes every user message as one JSON text frame on
 `ws://127.0.0.1:<port>/agent` (loopback only). On connect it first replays
-every user message that has no reply yet. A Claude Code session attaches by
-opening that socket with its `Monitor` tool:
+every user message that has no reply yet. Attach by opening that socket and
+keeping it open for the life of the session. Claude Code does this with its
+`Monitor` tool:
 
 ```
 Monitor({ ws: { url: "ws://127.0.0.1:<port>/agent" }, persistent: true, description: "reader questions" })
 ```
+
+Other agents can use any WebSocket client that streams incoming frames, e.g.
+`websocat ws://127.0.0.1:<port>/agent` run in the background.
 
 Each frame looks like:
 
@@ -64,8 +69,8 @@ temp JSON file for long answers rather than escaping by hand.
 | POST | `/api/messages` | `{docId,text,quote}` from the browser. Stored, pushed to agents, broadcast to browsers. |
 | GET | `/api/events?docId=` | Server-sent events stream of new messages for the browser. |
 | GET | `/api/status` | `{agents, unanswered}` so the UI can show whether a session is attached. |
-| GET | `/agent` | WebSocket push channel to Claude sessions (loopback only). |
-| POST | `/api/reply` | `{msgId,text}` from a Claude session (loopback only). |
+| GET | `/agent` | WebSocket push channel to agent sessions (loopback only). |
+| POST | `/api/reply` | `{msgId,text}` from an agent session (loopback only). |
 
 ## Layout
 
