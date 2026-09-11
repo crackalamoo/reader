@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reader</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header id="top">
+  <button type="button" id="bar" hidden title="Show the URL bar (or press /)">
+    <span id="bar-title"></span>
+    <span id="bar-status" class="status"></span>
+    <span class="chev">⌄</span>
+  </button>
+  <div id="controls">
+  <form id="open-form">
+    <input id="url" type="url" placeholder="Paste a URL (article or PDF)" required autofocus>
+    <button type="submit">Open</button>
+  </form>
+  <select id="docs" title="Previously opened"></select>
+  <span id="status" class="status" title="Whether an agent is attached">…</span>
+  <button type="button" id="collapse" hidden title="Hide the URL bar (Esc)">⌃</button>
+  </div>
+</header>
+<main>
+  <section id="viewer">
+    <div id="viewer-empty">Open a URL to start reading.</div>
+    <iframe id="frame" hidden></iframe>
+  </section>
+  <section id="chat">
+    <div id="messages"></div>
+    <form id="chat-form">
+      <div class="row">
+        <button type="button" id="ask-selection" class="pill" title="Quote the text you selected in the document">Quote selection</button>
+      </div>
+      <div id="composer">
+        <div id="quote-box" hidden>
+          <blockquote id="quote"></blockquote>
+          <button type="button" id="quote-clear" title="Remove quote" aria-label="Remove quote">×</button>
+        </div>
+        <textarea id="text" rows="1" placeholder="Ask about what you're reading…" title="Enter to send, Shift+Enter for a new line" disabled></textarea>
+        <button type="submit" id="send" disabled title="Send" aria-label="Send">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 13V3M3.5 7.5 8 3l4.5 4.5"/></svg>
+        </button>
+      </div>
+    </form>
+  </section>
+</main>
+<script src="/app.js"></script>
+</body>
+</html>
