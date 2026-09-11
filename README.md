@@ -13,8 +13,9 @@ go run .                     # default port 8080; -port N or PORT=N to change
 
 Flags: `-port`, `-host` (default `0.0.0.0`), `-data` (default `./data`, holds
 downloaded docs and `state.json` with chat history). No build step for the
-frontend; `static/` is embedded into the binary. Requires `pdftotext`
-(Homebrew `poppler`) for PDFs.
+frontend; `static/` is embedded into the binary. Run `scripts/fetch-pdfjs.sh`
+once first to download the PDF.js viewer into `static/pdfjs/` (not checked in).
+Requires `pdftotext` (Homebrew `poppler`) for PDFs.
 
 Open `http://<host>:<port>` in a browser, paste a URL, chat.
 
@@ -34,7 +35,7 @@ Replies are plain text; the UI does not render Markdown.
 | POST | `/api/open` | `{url}` → Doc. Downloads the page/PDF into `data/docs/`, extracts PDF text. Re-uses an earlier download of the same URL (and marks it as newest). At most 10 docs are kept: opening an 11th evicts the least recently opened doc, deleting its files and chat history. |
 | GET | `/api/docs` | List opened docs. |
 | GET | `/docs/{id}/raw` | The stored file. HTML gets a `<base>` tag and a selection-reporting script injected; the viewer iframe loads HTML docs from here. |
-| GET | `/docs/{id}/view` | PDFs only: redirects to the vendored PDF.js viewer (`static/pdfjs/`, version in `VERSION`) opened on `/raw`, so text is selectable and quoting works. |
+| GET | `/docs/{id}/view` | PDFs only: redirects to the PDF.js viewer (`static/pdfjs/`, fetched by `scripts/fetch-pdfjs.sh`) opened on `/raw`, so text is selectable and quoting works. |
 | GET | `/selection.js` | The selection-reporting script as a standalone file, loaded by the PDF.js viewer (its CSP forbids inline scripts). |
 | GET | `/api/messages?docId=` | Chat history for a doc. |
 | POST | `/api/messages` | `{docId,text,quote}` from the browser. Stored, pushed to agents, broadcast to browsers. |
