@@ -56,6 +56,7 @@ async function openDoc(d) {
   seen.clear();
   els.messages.innerHTML = "";
   for (const m of await api("GET", `/api/messages?docId=${d.id}`)) render(m);
+  els.messages.scrollTop = els.messages.scrollHeight;
   subscribe();
   refreshDocs();
 }
@@ -83,7 +84,9 @@ els.docs.addEventListener("change", async () => {
 
 // --- chat ---------------------------------------------------------------
 
-function render(m) {
+// Live replies jump to their first line so long answers read from the top;
+// everything else (history, the user's own messages) sticks to the bottom.
+function render(m, live = false) {
   if (seen.has(m.id)) return;
   seen.add(m.id);
   const div = document.createElement("div");
@@ -101,8 +104,13 @@ function render(m) {
   t.textContent = new Date(m.time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   div.appendChild(t);
   els.messages.appendChild(div);
-  els.messages.scrollTop = els.messages.scrollHeight;
   updatePending();
+  if (live && m.role === "assistant") {
+    const pad = parseFloat(getComputedStyle(els.messages).paddingTop);
+    els.messages.scrollTop += div.getBoundingClientRect().top - els.messages.getBoundingClientRect().top - pad;
+  } else {
+    els.messages.scrollTop = els.messages.scrollHeight;
+  }
 }
 
 function updatePending() {
@@ -122,7 +130,7 @@ function updatePending() {
 function subscribe() {
   if (events) events.close();
   events = new EventSource(`/api/events?docId=${doc.id}`);
-  events.addEventListener("message", (e) => render(JSON.parse(e.data)));
+  events.addEventListener("message", (e) => render(JSON.parse(e.data), true));
 }
 
 async function send() {
